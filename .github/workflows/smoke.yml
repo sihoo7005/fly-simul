@@ -17,9 +17,21 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y libosmesa6
       - run: python -m pip install -r requirements.txt
       - run: python -m unittest -q
-      - run: python simulate.py --target left --duration 0.1
+      - run: python simulate.py --target all --duration 0.2 --video
+      - run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          def first(name):
+              with (Path('results') / f'{name}.csv').open() as f:
+                  return next(csv.DictReader(f))
+          left, right, none = (first(name) for name in ('left', 'right', 'none'))
+          assert float(left['red_left']) > float(left['red_right'])
+          assert float(right['red_right']) > float(right['red_left'])
+          assert float(none['red_left']) == float(none['red_right']) == 0
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: fly-simul-smoke
-          path: results/*.csv
+          path: results/*
