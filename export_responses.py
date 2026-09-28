@@ -52,7 +52,8 @@ def main() -> None:
         if movie.ndim != 3 or movie.shape[-1] != len(coordinates):
             raise ValueError(f"Unexpected stimulus shape: {tuple(movie.shape)}")
         with torch.no_grad():
-            response = network.simulate(movie[None], dataset.dt, fade_in=True)
+            initial = network.fade_in_state(1.0, dataset.dt, movie[[0]])
+            response = network.simulate(movie[None], dataset.dt, initial_state=initial)
         voltage = response[0].index_select(1, torch.as_tensor(indices)).detach().cpu().numpy()
         if voltage.shape != (len(movie), len(types)):
             raise ValueError(f"Unexpected response shape: {voltage.shape}")
