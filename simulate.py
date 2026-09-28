@@ -34,7 +34,7 @@ def walking_signal(left: float, right: float) -> np.ndarray:
     return np.array([0.8 - turn, 0.8 + turn])
 
 
-def run(target: str, duration: float, output: Path, video: bool) -> None:
+def run(target: str, duration: float, output: Path, video: bool) -> list[tuple[float, ...]]:
     from flygym import Simulation
     from flygym.anatomy import BodySegment, ContactBodiesPreset
     from flygym.compose import FlatGroundWorld
@@ -117,6 +117,26 @@ def run(target: str, duration: float, output: Path, video: bool) -> None:
     if video:
         sim.renderer.save_video(output / f"{target}.mp4")
     print(f"{target}: {len(rows)} visual samples; saved {path}")
+    return rows
+
+
+def plot_paths(paths: dict[str, list[tuple[float, ...]]], output: Path) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    for target, rows in paths.items():
+        positions = np.asarray(rows)
+        ax.plot(positions[:, 1], positions[:, 2], label=target)
+        ax.scatter(*positions[-1, 1:3], s=20)
+    ax.set(xlabel="x (mm)", ylabel="y (mm)", title="Fly paths by visual target")
+    ax.axis("equal")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(output / "paths.png", dpi=160)
+    plt.close(fig)
 
 
 def main() -> None:
@@ -130,8 +150,8 @@ def main() -> None:
         parser.error("--duration must be finite and positive")
     args.output.mkdir(parents=True, exist_ok=True)
     targets = TARGET_Y if args.target == "all" else (args.target,)
-    for target in targets:
-        run(target, args.duration, args.output, args.video)
+    paths = {target: run(target, args.duration, args.output, args.video) for target in targets}
+    plot_paths(paths, args.output)
 
 
 if __name__ == "__main__":
