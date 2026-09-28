@@ -1,7 +1,7 @@
 name: visual neuron viewer
 on:
   push:
-    branches: [main, visual-neurons]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,7 +28,6 @@ jobs:
         with:
           path: web
   deploy:
-    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
