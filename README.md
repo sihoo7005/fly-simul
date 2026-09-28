@@ -13,7 +13,7 @@ python -m pip install -r requirements.txt
 python simulate.py --duration 2 --video
 ```
 
-화면 없는 서버에서는 실행 전에 `MUJOCO_GL=egl`과 `PYOPENGL_PLATFORM=egl`을 설정한다. FlyGym은 처음 실행할 때 몸체 메시 데이터를 내려받는다.
+화면 없는 서버에서는 OSMesa를 설치하고 실행 전에 `MUJOCO_GL=osmesa`와 `PYOPENGL_PLATFORM=osmesa`를 설정한다. FlyGym은 처음 실행할 때 몸체 메시 데이터를 내려받는다.
 
 `results/none.csv`, `results/left.csv`, `results/right.csv`에 시간, 몸통 위치, 양쪽 눈의 빨간색 비율, 좌우 구동 신호가 기록된다. `--video`를 주면 각 조건의 몸 카메라 영상도 저장된다. 짧은 실행은 `python simulate.py --target left --duration 0.1 --output results`로 확인할 수 있다.
 
