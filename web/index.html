@@ -3,83 +3,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fly Simul · 시각과 움직임</title>
+  <title>Fly Vision · 시각 뉴런 반응</title>
   <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101924; color: #e9f1f7; }
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0e1620; color: #edf4fa; }
     * { box-sizing: border-box; }
     body { margin: 0; }
-    header, main, footer { max-width: 1100px; margin: auto; padding: 24px; }
-    header { padding-top: 40px; }
-    .eyebrow { color: #75d6cd; font-size: 13px; letter-spacing: .12em; font-weight: 700; }
-    h1 { margin: 8px 0; font-size: clamp(29px, 5vw, 46px); }
-    p { color: #b3c5d2; line-height: 1.6; }
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 24px 0 10px; }
-    button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid #4a6474; background: #203340; color: #e9f1f7; padding: 10px 16px; }
-    button:hover, button:focus-visible { border-color: #80e5d7; }
-    button[aria-pressed="true"] { background: #0f615d; border-color: #75d6cd; }
-    .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); gap: 16px; }
-    .card { background: #172633; border: 1px solid #304451; border-radius: 16px; padding: 18px; min-width: 0; }
-    .card h2 { margin: 0 0 14px; font-size: 18px; }
-    video { width: 100%; display: block; background: #000; border-radius: 10px; aspect-ratio: 4/3; }
-    .timeline { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
-    .timeline input { flex: 1; min-width: 0; accent-color: #75d6cd; }
+    header, main, footer { max-width: 1180px; margin: auto; padding: 22px; }
+    header { padding-top: 34px; }
+    .eyebrow { color: #7adad1; font-size: 13px; font-weight: 700; letter-spacing: .1em; }
+    h1 { font-size: clamp(28px, 5vw, 42px); margin: 8px 0; }
+    h2 { font-size: 18px; margin: 0 0 14px; }
+    p { color: #b6cad7; line-height: 1.55; }
+    button, input { font: inherit; }
+    button { cursor: pointer; border: 1px solid #516877; border-radius: 10px; padding: 10px 14px; background: #213542; color: #edf4fa; }
+    button:hover, button:focus-visible { border-color: #8ce6df; }
+    button[aria-pressed="true"] { background: #146863; border-color: #7adad1; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 22px 0 0; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 16px; }
+    .card { min-width: 0; background: #172734; border: 1px solid #304653; border-radius: 15px; padding: 18px; }
+    .card + .card { margin-top: 16px; }
+    canvas { display: block; width: 100%; }
+    #stimulus { height: 310px; border-radius: 10px; background: #111c25; }
+    #trace { height: 260px; }
+    .timeline { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .timeline input { min-width: 0; flex: 1; accent-color: #7adad1; }
     output { font-variant-numeric: tabular-nums; min-width: 55px; text-align: right; }
-    canvas { width: 100%; height: 300px; display: block; }
-    .legend { display: flex; gap: 13px; flex-wrap: wrap; color: #b3c5d2; font-size: 13px; }
-    .legend span::before { content: ""; display: inline-block; background: var(--color); width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
-    .eye { margin: 18px 0; }
-    .eye label { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .track { background: #344451; border-radius: 6px; height: 12px; overflow: hidden; }
-    .fill { width: 0; height: 100%; background: #ef6656; transition: width .08s linear; }
-    .note { font-size: 13px; margin: 12px 0 0; }
-    #error { color: #ffb3a8; }
-    a { color: #75d6cd; }
-    footer { color: #95acba; font-size: 13px; padding-bottom: 40px; }
-    @media (max-width: 750px) { .grid { grid-template-columns: 1fr; } header, main, footer { padding-left: 16px; padding-right: 16px; } }
+    .list { max-height: 490px; overflow: auto; }
+    .row { display: grid; grid-template-columns: 80px 1fr 76px; align-items: center; gap: 10px; width: 100%; padding: 8px 4px; border: 0; border-bottom: 1px solid #314451; border-radius: 0; background: transparent; text-align: left; }
+    .row[aria-current="true"] { color: #7adad1; }
+    .bar { height: 8px; background: #344550; border-radius: 8px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: #ef9678; }
+    .bar span.negative { background: #86b8f0; }
+    .value { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
+    .muted { font-size: 14px; color: #a5bac7; }
+    #error { color: #ffafa1; }
+    a { color: #7adad1; }
+    footer { color: #a5bac7; font-size: 14px; padding-bottom: 40px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } header, main, footer { padding-left: 16px; padding-right: 16px; } }
   </style>
 </head>
 <body>
   <header>
-    <div class="eyebrow">FLY SIMUL · 3D VISUAL WALKING</div>
-    <h1>초파리는 무엇을 보고 어디로 갈까?</h1>
-    <p>빨간 공을 왼쪽, 오른쪽에 놓거나 치운 세 실험을 비교해 봐. 영상은 실제 FlyGym 물리 시뮬레이션의 녹화본이야.</p>
-    <div class="controls" role="group" aria-label="실험 조건">
-      <button data-condition="none" aria-pressed="true">목표물 없음</button>
-      <button data-condition="left" aria-pressed="false">왼쪽에 공</button>
-      <button data-condition="right" aria-pressed="false">오른쪽에 공</button>
+    <div class="eyebrow">FLY VISION · NEURAL RESPONSE</div>
+    <h1>빛을 보면 어떤 뉴런이 반응할까?</h1>
+    <p>자극을 선택하고 시간을 움직여 봐. 아래 값은 공개 FlyVis 시각 신경계 모델이 계산한 뉴런 유형별 전압 변화야.</p>
+    <div class="controls" role="group" aria-label="시각 자극">
+      <button data-stimulus="bright" aria-pressed="true">밝은 점</button>
+      <button data-stimulus="dark" aria-pressed="false">어두운 점</button>
+      <button data-stimulus="edge_0" aria-pressed="false">이동 경계 0°</button>
+      <button data-stimulus="edge_180" aria-pressed="false">이동 경계 180°</button>
     </div>
   </header>
-  <main class="grid">
-    <section class="card">
-      <h2>3차원 초파리</h2>
-      <video id="video" playsinline preload="metadata" aria-label="선택한 실험의 3차원 시뮬레이션 영상"></video>
-      <div class="timeline">
-        <button id="play" aria-label="재생">▶ 재생</button>
-        <input id="seek" type="range" min="0" max="1000" value="0" aria-label="영상 위치">
-        <output id="time">0.00초</output>
+  <main>
+    <p id="error" role="alert">모델 결과를 불러오는 중…</p>
+    <div class="grid">
+      <div>
+        <section class="card">
+          <h2>시각 입력</h2>
+          <canvas id="stimulus" role="img" aria-label="선택한 시각 자극의 현재 프레임"></canvas>
+          <div class="timeline">
+            <button id="play" aria-label="재생">▶ 재생</button>
+            <input id="seek" type="range" min="0" max="0" value="0" aria-label="시간 위치">
+            <output id="time">0.00초</output>
+          </div>
+          <p class="muted">밝기만 입력하는 모델이야. 점멸과 이동 경계는 FlyVis 공식 자극 생성기를 사용했어.</p>
+        </section>
+        <section class="card">
+          <h2><span id="selected-cell">L1</span> 뉴런 유형의 반응</h2>
+          <canvas id="trace" role="img" aria-label="선택한 뉴런 유형의 시간별 전압 변화"></canvas>
+          <p class="muted">자극 전 1초 평균을 0으로 둔 상대 전압 변화 (모델 단위). 빨강은 상승, 파랑은 하강.</p>
+        </section>
       </div>
-      <p class="note">웹 화면은 녹화된 실험을 재생해. 초파리의 걷기는 FlyGym의 다리 제어기와 물리 엔진이 계산했어.</p>
-    </section>
-    <div>
       <section class="card">
-        <h2>이동 경로 (mm)</h2>
-        <canvas id="paths" role="img" aria-label="세 조건의 초파리 이동 경로"></canvas>
-        <div class="legend">
-          <span style="--color:#78aee8">없음</span>
-          <span style="--color:#ffb353">왼쪽</span>
-          <span style="--color:#79d9a2">오른쪽</span>
-        </div>
-      </section>
-      <section class="card" style="margin-top:16px">
-        <h2>눈에 보이는 빨간색</h2>
-        <div class="eye"><label>왼쪽 눈 <output id="left-value">0.00%</output></label><div class="track"><div class="fill" id="left-bar"></div></div></div>
-        <div class="eye"><label>오른쪽 눈 <output id="right-value">0.00%</output></label><div class="track"><div class="fill" id="right-bar"></div></div></div>
-        <p class="note">표시값은 각 눈 영상에서 빨간 픽셀이 차지하는 비율이야. 이 차이로 좌우 걷기 신호를 조절해.</p>
+        <h2>현재 시점의 뉴런 유형</h2>
+        <p class="muted">각 유형의 가운데 뉴런 하나씩 표시해. 행을 누르면 시간별 반응을 볼 수 있어. 전압 변화 순서대로 정렬했어.</p>
+        <div id="cells" class="list"></div>
       </section>
     </div>
-    <p id="error" role="alert"></p>
   </main>
-  <footer>현재 행동은 간단한 시각 규칙으로 정해. 실제 초파리 뇌 연결망은 아직 제어기에 연결되지 않았어. <a href="https://github.com/sihoo7005/fly-simul">코드 보기</a></footer>
+  <footer>이 결과는 실험에서 직접 측정한 발화가 아니라 <a href="https://github.com/TuragaLab/flyvis">FlyVis</a>의 학습된 시각 회로가 예측한 전압이야. 전체 뇌·행동 모델은 포함하지 않아. <a href="https://github.com/sihoo7005/fly-simul">실험 코드</a></footer>
   <script src="app.js" defer></script>
 </body>
 </html>
