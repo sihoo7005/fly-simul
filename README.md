@@ -16,7 +16,7 @@
 Python 3.11 환경에서:
 
 ```bash
-python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 python -m pip install -r requirements.txt
 flyvis download-pretrained --skip_large_files
 python export_responses.py
